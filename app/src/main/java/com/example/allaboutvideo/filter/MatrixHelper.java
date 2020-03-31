@@ -38,8 +38,9 @@ public class MatrixHelper {
     }
 
     public static float[] getIdentityM() {
-        Matrix.setIdentityM(mtMatrix, 0);
-        return mtMatrix;
+        float[] floats = new float[16];
+        Matrix.setIdentityM(floats, 0);
+        return floats;
     }
 
     public static float[] getMatrix() {

@@ -10,6 +10,7 @@ import android.view.Surface;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.allaboutvideo.R;
+import com.example.allaboutvideo.base.PageParam;
 import com.example.allaboutvideo.filter.BaseFilter;
 import com.example.allaboutvideo.filter.GpuUtils;
 import com.example.allaboutvideo.filter.OesFilter;
@@ -22,15 +23,14 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class SimplePlayActivity extends AppCompatActivity {
 
-    public static final String VIDEO_PATH = "video_path";
     SurfaceTexture surfaceTexture;
-
+    protected String mPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gl_sur);
-
+        mPath = getIntent().getStringExtra(PageParam.VIDEO_PATH);
 
         final GLSurfaceView content = findViewById(R.id.content);
 
@@ -50,10 +50,10 @@ public class SimplePlayActivity extends AppCompatActivity {
                 GpuUtils.createTextureID(oesTextures, true);
                 try {
                     Intent intent = getIntent();
-                    String path = intent.getStringExtra(VIDEO_PATH);
+
 
                     final MediaPlayer mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setDataSource(path);
+                    mediaPlayer.setDataSource(mPath);
                     mediaPlayer.setVolume(0, 0);
                     mediaPlayer.setLooping(true);
                     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -98,7 +98,6 @@ public class SimplePlayActivity extends AppCompatActivity {
             }
 
         });
-
     }
 
     @Override

@@ -16,13 +16,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.allaboutvideo.R;
 import com.example.allaboutvideo.choosevideo.VideoChooseActivity;
 import com.example.allaboutvideo.gl.GLDiceActivity;
+import com.example.allaboutvideo.reencode.ReEncodeActivity;
 
 public class MainActivity extends AppCompatActivity {
 
     String[] funs = {
             "opengl小栗子",
             "简单利用opengl渲染播放",
-            "。。。",
+            "重编码",
     };
 
     @Override
@@ -67,9 +68,18 @@ public class MainActivity extends AppCompatActivity {
                         case 0:
                             startActivity(new Intent(MainActivity.this, GLDiceActivity.class));
                             break;
-                        case 1:
-                            startActivity(new Intent(MainActivity.this, VideoChooseActivity.class));
+                        case 1: {
+                            Intent intent = new Intent(MainActivity.this, VideoChooseActivity.class);
+                            intent.putExtra(VideoChooseActivity.JUMP_TYEP, 0);
+                            startActivity(intent);
                             break;
+                        }
+                        case 2: {
+                            Intent intent = new Intent(MainActivity.this, VideoChooseActivity.class);
+                            intent.putExtra(VideoChooseActivity.JUMP_TYEP, 1);
+                            startActivity(intent);
+                            break;
+                        }
                     }
                 }
             });

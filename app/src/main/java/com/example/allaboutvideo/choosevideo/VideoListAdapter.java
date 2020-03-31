@@ -16,7 +16,9 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.allaboutvideo.GlideUtil;
 import com.example.allaboutvideo.R;
+import com.example.allaboutvideo.base.PageParam;
 import com.example.allaboutvideo.entity.VideoInfoEntity;
+import com.example.allaboutvideo.reencode.ReEncodeActivity;
 import com.example.allaboutvideo.simpleplay.SimplePlayActivity;
 
 import java.io.File;
@@ -25,9 +27,11 @@ import java.util.List;
 public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.ViewHolder> {
 
     private final List<VideoInfoEntity> data;
+    private final int type;
 
-    public VideoListAdapter(List<VideoInfoEntity> data) {
+    public VideoListAdapter(List<VideoInfoEntity> data, int type) {
         this.data = data;
+        this.type = type;
     }
 
     @NonNull
@@ -70,10 +74,24 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.View
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Intent intent = null;
                     VideoInfoEntity videoInfoEntity = data.get(getAdapterPosition());
-                    Intent intent = new Intent(view.getContext(), SimplePlayActivity.class);
-                    intent.putExtra(SimplePlayActivity.VIDEO_PATH, videoInfoEntity.path);
-                    view.getContext().startActivity(intent);
+                    switch (type) {
+                        case 0: {
+                            intent = new Intent(view.getContext(), SimplePlayActivity.class);
+                            break;
+                        }
+                        case 1: {
+                            intent = new Intent(view.getContext(), ReEncodeActivity.class);
+                            break;
+                        }
+
+                    }
+
+                    if (intent != null) {
+                        intent.putExtra(PageParam.VIDEO_PATH, videoInfoEntity.path);
+                        view.getContext().startActivity(intent);
+                    }
                 }
             });
         }

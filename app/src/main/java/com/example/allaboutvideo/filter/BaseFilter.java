@@ -21,6 +21,7 @@ import java.util.LinkedList;
  */
 public abstract class BaseFilter {
 
+
     public static final String BASE_VERT = "attribute vec4 aVertexCo;\n" +
             "attribute vec2 aTextureCo;\n" +
             "\n" +
@@ -33,15 +34,14 @@ public abstract class BaseFilter {
             "    gl_Position = uVertexMatrix*aVertexCo;\n" +
             "    vTextureCo = (uTextureMatrix*vec4(aTextureCo,0,1)).xy;\n" +
             "}";
-
     protected float[] mVertexMatrix = MatrixUtils.getOriginalMatrix();
     protected float[] mTextureMatrix = MatrixUtils.getOriginalMatrix();
 
     protected FloatBuffer mVertexBuffer;
     protected FloatBuffer mTextureBuffer;
 
-    protected int mWidth;
-    protected int mHeight;
+    public int mWidth;
+    public int mHeight;
 
     protected Resources mRes;
     private String mVertex;

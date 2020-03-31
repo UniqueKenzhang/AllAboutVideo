@@ -21,6 +21,8 @@ import java.util.List;
 
 public class VideoChooseActivity extends AppCompatActivity {
 
+    public final static String JUMP_TYEP = "jump_type";
+
     public static final String VIDEO_SEL = MediaStore.Video.Media.MIME_TYPE + "=? and "
             + MediaStore.Video.Media.DURATION + ">? AND "
             + MediaStore.Video.Media.DURATION + "<?";
@@ -44,7 +46,8 @@ public class VideoChooseActivity extends AppCompatActivity {
 
         mContent.setLayoutManager(new GridLayoutManager(this, 3));
         ArrayList<VideoInfoEntity> data = new ArrayList<>();
-        mAdapter = new VideoListAdapter(data);
+        int type = getIntent().getIntExtra(JUMP_TYEP, 0);
+        mAdapter = new VideoListAdapter(data, type);
         mContent.setAdapter(mAdapter);
 
         getLocalVideoData();
