@@ -1,6 +1,5 @@
 package com.example.allaboutvideo.simpleplay;
 
-import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
@@ -25,6 +24,7 @@ public class SimplePlayActivity extends AppCompatActivity {
 
     SurfaceTexture surfaceTexture;
     protected String mPath;
+    protected MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +49,8 @@ public class SimplePlayActivity extends AppCompatActivity {
 
                 GpuUtils.createTextureID(oesTextures, true);
                 try {
-                    Intent intent = getIntent();
-
-
-                    final MediaPlayer mediaPlayer = new MediaPlayer();
+                    mediaPlayer = new MediaPlayer();
                     mediaPlayer.setDataSource(mPath);
-                    mediaPlayer.setVolume(0, 0);
                     mediaPlayer.setLooping(true);
                     mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                         @Override
@@ -103,9 +99,22 @@ public class SimplePlayActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        try {
+            if (surfaceTexture != null)
+                surfaceTexture.release();
 
-        if (surfaceTexture != null)
-            surfaceTexture.release();
+            if(mediaPlayer!=null){
+                mediaPlayer.stop();
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(mediaPlayer!=null){
+                mediaPlayer.release();
+            }
+        }
+
 
     }
 }

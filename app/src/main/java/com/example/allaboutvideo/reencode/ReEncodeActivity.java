@@ -4,8 +4,10 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.allaboutvideo.PageUtil;
 import com.example.allaboutvideo.R;
 import com.example.allaboutvideo.codec.MyRecorder;
 import com.example.allaboutvideo.codec.ProcessListener;
@@ -26,9 +28,12 @@ public class ReEncodeActivity extends SimplePlayActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+        final TextView btn = findViewById(R.id.btn);
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mediaPlayer.stop();
+
                 ViewPort viewPort = new ViewPort();
                 viewPort.path = mPath;
 
@@ -38,7 +43,7 @@ public class ReEncodeActivity extends SimplePlayActivity {
                 if (!file.exists() || !file.isDirectory()) {
                     file.mkdir();
                 }
-                String out = dir + "/out.mp4";
+                final String out = dir + "/out.mp4";
                 try {
                     file = new File(out);
                     if (!file.exists()) {
@@ -49,14 +54,17 @@ public class ReEncodeActivity extends SimplePlayActivity {
                 }
 
 
-                MyRecorder myRecorder = new MyRecorder(source.w, source.h, source.bitRate, 2, source.fps, out);
+                MyRecorder myRecorder = new MyRecorder(source, out);
                 new VideoFilterMixTask(source, myRecorder, BitmapFactory.decodeResource(getResources(), R.mipmap.smile), 0, new ProcessListener() {
                     @Override
                     public void onFinish() {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(ReEncodeActivity.this, "finish", Toast.LENGTH_SHORT).show();
+                                btn.setText( "100%");
+                                Toast.makeText(ReEncodeActivity.this, "reEncode finish", Toast.LENGTH_SHORT).show();
+                                PageUtil.toPlayer(ReEncodeActivity.this, out);
+                                finish();
                             }
                         });
 
@@ -68,7 +76,13 @@ public class ReEncodeActivity extends SimplePlayActivity {
                     }
 
                     @Override
-                    public void onProcess(int progress) {
+                    public void onProcess(final int progress) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                btn.setText(progress+"%");
+                            }
+                        });
 
                     }
 

@@ -23,6 +23,7 @@ public class VideoSource {
     public long start;
     public long end;
     public OesContinueFilter filter;
+    public boolean isNeedAudio = true;
 
     public VideoSource(ViewPort port) {
         this(port, 0, 0);
@@ -32,8 +33,7 @@ public class VideoSource {
     public VideoSource(ViewPort port, long start, long end) {
         this.port = port;
         this.start = start;
-        MVExtractor extractor = new MVExtractor(port.path, start);
-        extractor.setEableAudioTrack(false);
+        MVExtractor extractor = new MVExtractor(port.path, start, isNeedAudio);
         if (end <= 0) {
             this.end = extractor.getDuration() / 1000;
         } else {
@@ -49,5 +49,9 @@ public class VideoSource {
             fps = 30;
         }
         this.duration = this.end - start;
+    }
+
+    public MVExtractor getExtractor() {
+        return task.getExtractor();
     }
 }

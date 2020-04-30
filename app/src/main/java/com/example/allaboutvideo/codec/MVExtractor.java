@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class MVExtractor {
+    public boolean isNeedAudio;
     private long start;
     private boolean enableAudio;
 
@@ -82,17 +83,17 @@ public class MVExtractor {
     private ByteBuffer mAudioBuffer = null;
     private String mFile = null;
 
-    public MVExtractor(String sourceFile) {
-        this(sourceFile, -1);
+    public MVExtractor(String sourceFile, long start) {
+        this(sourceFile, -1, false);
     }
 
-    public MVExtractor(String sourceFile, long startMs) {
+    public MVExtractor(String sourceFile, long startMs, boolean isNeedAudio) {
         if (sourceFile == null) {
             return;
         }
         this.start = startMs;
         mFile = sourceFile;
-        //getExtractor();
+        this.isNeedAudio = isNeedAudio;
         StartThread();
     }
 
@@ -112,7 +113,6 @@ public class MVExtractor {
             if (!f.exists()) {
                 return false;
             }
-
         } catch (Exception e) {
             return false;
         }
@@ -314,39 +314,7 @@ public class MVExtractor {
             Log.e(TAG, "readFrameFromExtractor error extractorDone:" + mExtractorDone + " extractor:" + extractor);
             return null;
         }
-        //if(VERBOSE) Log.d(TAG,"readFrameFromExtractor: CachedDuration:"+extractor.getCachedDuration()+ " hasCacheReachedEndOfStream:" +extractor.hasCacheReachedEndOfStream());
-		/*if( extractor.getCachedDuration() <= 0 && !extractor.hasCacheReachedEndOfStream())
-		{
-			long duration = getDuration();
-			Log.d(TAG,"readFrameFromExtractor: duration:"+duration );
 
-			//if( duration - 500000 > mAudioNewReadPts )  /// || SystemUtils.isAvalidNetSetting(KGCommonApplication.getContext())
-			{
-				 Log.e(TAG, "readFrameFromExtractor: duration:" + duration + " readpts:" + mAudioNewReadPts + " CachedDuration:"+extractor.getCachedDuration()+ " hasCacheReachedEndOfStream:" +extractor.hasCacheReachedEndOfStream());
-				mLock.lock();
-				try {
-					if (VERBOSE) Log.d(TAG, "readFrameFromExtractor wait..");
-					mCondition.awaitNanos(50000000);
-					//mCondition.await();
-				} catch (Exception e) {
-					e.printStackTrace();
-					Log.e(TAG, "readFrameFromExtractor wait,Exception" + e);
-				} finally {
-					mLock.unlock();
-				}
-				return null;
-			}
-		}
-		if( mReadIsFailed )
-		{
-			if( SystemUtils.isAvalidNetSetting(KGCommonApplication.getContext()) )
-			{
-				mReadIsFailed = false;
-			}
-			else{
-				return null;
-			}
-		}*/
         Frame frame = new Frame();
         frame.index = extractor.getSampleTrackIndex();
         if (frame.index >= 0) {
@@ -487,6 +455,19 @@ public class MVExtractor {
         return mAudioIndex;
     }
 
+    public MediaFormat getAudioFormat() {
+
+        try {
+            if (mAudioIndex >= 0) {
+                return mExtractor.getTrackFormat(mAudioIndex);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public void seekTo(long timeUs, int mode) {
         Log.d(TAG, "seekTo " + timeUs + "us");
         if (timeUs < 0) {
@@ -552,164 +533,6 @@ public class MVExtractor {
         }
         Log.d(TAG, "setReadState end");
     }
-/*  public void waitSeekCompleted(int index)
-  {
-
-	  Log.d(TAG,"waitSeekCompleted start");
-	  if(index == mVideoIndex){
-		  mVideoLock.lock();
-		  try {
-			    Log.d(TAG,"waitSeekCompleted wait video...");
-		      	    while( !mVideoSeekDone )
-		      	    {
-		      		    mVideoCondition.awaitNanos(1000000); //wait 1ms
-		      		    //mVideoCondition.await();
-		      	    }
-
-	          }catch(Exception e) {
-	                  Log.e(TAG, "waitSeekCompleted video Exception:"+e );
-	                  e.printStackTrace();
-
-	          }finally {
-	        	  mVideoLock.unlock();
-	          }
-	  }
-	  if(index == mAudioIndex){
-		  Log.d(TAG,"waitSeekCompleted wait audio...");
-	          mAudioLock.lock();
-	          try {
-		      	    while( !mAudioSeekDone)
-		      	    {
-		      		     mAudioCondition.awaitNanos(1000000); //wait 1ms
-		      		    //mVideoCondition.await();
-		      	    }
-
-	          }catch(Exception e) {
-	                  Log.e(TAG, "waitSeekCompleted audio frame Exception:"+e );
-	                  e.printStackTrace();
-
-	          }finally {
-	        	  mAudioLock.unlock();
-	          }
-          }
-	  Log.d(TAG,"waitSeekCompleted end");
-  }*/
- /* public void seekTo2(long timeUs, int mode)
-  {
-	  Log.d(TAG,"seekTo "+timeUs +"us");
-	  if(mExtractor==null)
-	  {
-		  Log.e(TAG,"seekTo("+timeUs+" us) error, mExtractor is null ");
-		  return;
-	  }
-
-	  mLock.lock();
-	  try{
-		  mVideoQueue.clear();
-		  mAudioQueue.clear();
-		  mExtractor.seekTo( timeUs, mode );
-		  mExtractorDone = false;
-		  mCondition.signalAll();
-	  }catch(Exception e){
-		  e.printStackTrace();
-	  }finally{
-		  mLock.unlock();
-	  }
-	  Log.d(TAG,"seekTo end");
-  }*/
-
- /*  public Frame readFrame2(int index)
-   {
-	   Frame frame = null;
-	   //int index = extractor.getSampleTrackIndex();
-	   //int size = extractor.readSampleData(decoderInputBuffer, 0);
-	   //extractor.getSampleFlags()
-            //videoExtractorDone = !extractor.advance();
-
-
-	   if(mExtractor==null)
-	   {
-		   Log.e(TAG,"extractor is null");
-		   return null;
-	   }
-	   mLock.lock();
-	   if(index == mVideoIndex)
-	   {
-		   if(mVideoQueue.size() > 0)
-		   {
-			   frame = mVideoQueue.poll();
-		   }else{
-			   while(!mExtractorDone)
-			   {
-			        frame = readFrameFromExtractor();
-			        if(frame == null)
-			        {
-			        	Log.e(TAG,"readFrameFromExtractor return null" );
-			        	break;
-			        }
-			        else if(frame.index == mVideoIndex)
-			        {
-			        	//return frame;
-			        	break;
-			        }
-			        else if(frame.index == mAudioIndex)
-			        {
-			        	//TODO
-			        	if(mAudioQueue.size() >= mAudioMax)
-			        	{
-			        		Log.e(TAG,"mAudioQueue is full FFFFF,size:"+mAudioQueue.size());
-			        	}
-			        	else
-			        	{       //Log.d(TAG,"mAudioQueue EEEEE,size:"+mAudioQueue.size());
-			        		mAudioQueue.offer(frame);
-			        	}
-			        }
-			   }
-		   }
-	   }
-	   else if(index == mAudioIndex)
-	   {
-		   if(mAudioQueue.size() > 0)
-		   {
-			   frame = mAudioQueue.poll();
-		   }else{
-			   while(!mExtractorDone)
-			   {
-			        frame = readFrameFromExtractor();
-			        if(frame == null)
-			        {
-			        	Log.e(TAG,"readFrameFromExtractor return null" );
-			        	break;
-			        }
-			        else if(frame.index == mAudioIndex)
-			        {
-			        	break;
-			        	//return frame;
-			        }
-			        else if(frame.index ==  mVideoIndex)
-			        {
-			        	//TODO
-			        	if( mVideoQueue.size() >= mVideoMax)
-			        	{
-			        		Log.e(TAG,"mVideoQueue is full FFFFF,size:"+mVideoQueue.size());
-			        		//break;
-			        	}
-			        	else
-			        	{
-			        		//Log.d(TAG,"mVideoQueue EEEEE,size:"+mVideoQueue.size());
-			        		mVideoQueue.offer(frame);
-			        	}
-			        }
-			   }
-		   }
-	   }
-	   else{
-		   Log.e(TAG,"invalid index");
-	   }
-	   mLock.unlock();
-
-	   return frame;
-   }*/
 
     public boolean isEof() {
         mLock.lock();
@@ -726,34 +549,21 @@ public class MVExtractor {
 
     public Frame readFrame(int index) {
         Frame frame = null;
-        //int index = extractor.getSampleTrackIndex();
-        //int size = extractor.readSampleData(decoderInputBuffer, 0);
-        //extractor.getSampleFlags()
-        //videoExtractorDone = !extractor.advance();
         if (VERBOSE) Log.d(TAG, "readFrame index:" + index);
-	   /*mLock.lock();
-	   if(mSeektimeUs >= 0)
-	   {
-		   mLock.unlock();
-		   return null;
-	   }
-	   mLock.unlock();*/
 
         if (index == mVideoIndex) {
             mVideoLock.lock();
             try {
                 while (!mStop && !mVideoReadPaused && !mExtractorDone && mVideoQueue != null && (!mVideoSeekDone || mVideoQueue.size() == 0)) {
-                    //mVideoCondition.awaitNanos(3000000); //wait 3ms
                     mVideoCondition.await();
-
                 }
+
                 if (!mVideoReadPaused && mVideoSeekDone && mVideoQueue != null && mVideoQueue.size() > 0) {
                     frame = mVideoQueue.poll();
                 }
             } catch (Exception e) {
                 Log.e(TAG, "getVideoFrame Exception:" + e);
                 e.printStackTrace();
-
             } finally {
                 mVideoLock.unlock();
             }
@@ -762,7 +572,6 @@ public class MVExtractor {
             mAudioLock.lock();
             try {
                 while (!mStop && !mAudioReadPaused && !mExtractorDone && mAudioQueue != null && (!mAudioSeekDone || mAudioQueue.size() == 0)) {
-                    //mAudioCondition.awaitNanos(3000000); //wait 3ms
                     mAudioCondition.await();
                 }
                 if (!mAudioReadPaused && mAudioSeekDone && mAudioQueue != null && mAudioQueue.size() > 0) {

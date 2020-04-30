@@ -26,6 +26,10 @@ public class MediaDecodeTask {
     private ByteBuffer[] videoDecoderInputBuffers;
     private boolean mVideoDecodeEof = false;
 
+    public MVExtractor getExtractor() {
+        return mMVExtractor;
+    }
+
     public MediaDecodeTask(MVExtractor extractor, long end) {
         mMVExtractor = extractor;
         this.mEnd = end * 1000;
@@ -133,7 +137,9 @@ public class MediaDecodeTask {
                 break;
             }
 
-            mMVExtractor.clear(mAudioIndex);
+            if (!mMVExtractor.isNeedAudio) {
+                mMVExtractor.clear(mAudioIndex);
+            }
             MVExtractor.Frame frame = mMVExtractor.readFrame(mVideoIndex);
 
             if (frame == null) {

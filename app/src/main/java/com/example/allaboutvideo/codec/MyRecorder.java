@@ -43,6 +43,7 @@ public class MyRecorder {
     private static int level = 2;
     private static int sublevel = 2;
     private final int fps;
+    private final VideoSource source;
     private int gop = 2;
     private int bitrate;
 
@@ -62,18 +63,20 @@ public class MyRecorder {
     private boolean mMuxerStarted;
     private MediaMuxer mMuxer;
     private int mTrackIndex;
+    private int mAudioTrackIndex;
+    private int mSourceAudioIndex;
 
 
-    public MyRecorder(int w, int h, int bitrate, int gop, int fps, String outputPath) {
-        this.frameWidth = w;
-        this.frameHeight = h;
-        this.mOutput = outputPath;
-        this.bitrate = bitrate;
-        this.fps = fps;
-        this.gop = gop;
+    public MyRecorder(VideoSource source, String out) {
+        this.source = source;
+        this.mOutput = out;
+        this.frameWidth = source.w;
+        this.frameHeight = source.h;
+        this.bitrate = source.bitRate;
+        this.fps = source.fps;
+        this.gop = 2;
 
         prepareEncoder(level, sublevel);
-
     }
 
     public void setOnEncodedListener(OnEcodecListener l) {
@@ -267,6 +270,15 @@ public class MyRecorder {
                     }
 
                     mTrackIndex = mMuxer.addTrack(mMediaCodec.getOutputFormat());
+                    try {
+                        if (source.isNeedAudio) {
+                            mAudioTrackIndex = mMuxer.addTrack(source.getExtractor().getAudioFormat());
+                            mSourceAudioIndex = source.getExtractor().getAudioIndex();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     mMuxer.start();
                     mMuxerStarted = true;
                 } else {
@@ -298,6 +310,18 @@ public class MyRecorder {
                             l.onEncodecd(this, encodedData, mBufferInfo, stamp);
                         }
                         mMuxer.writeSampleData(mTrackIndex, encodedData, mBufferInfo);
+
+
+                        MVExtractor.Frame frame = source.getExtractor().readFrame(mSourceAudioIndex);
+                        while (frame != null) {
+                            mBufferInfo.flags = frame.sampleFlags;
+                            mBufferInfo.presentationTimeUs = frame.ptsUs;
+                            mBufferInfo.offset = 0;
+                            mBufferInfo.size = frame.bufferSize;
+                            mMuxer.writeSampleData(mAudioTrackIndex, frame.buffer, mBufferInfo);
+                            frame = source.getExtractor().readFrame(mSourceAudioIndex);
+                        }
+
                     }
                     mMediaCodec.releaseOutputBuffer(encoderStatus, false);
                     if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {

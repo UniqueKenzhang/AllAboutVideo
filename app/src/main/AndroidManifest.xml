@@ -20,9 +20,7 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".simpleplay.SimplePlayActivity"
-            android:launchMode="singleTop" />
+        <activity android:name=".simpleplay.SimplePlayActivity" />
 
         <activity
             android:name=".choosevideo.VideoChooseActivity"
