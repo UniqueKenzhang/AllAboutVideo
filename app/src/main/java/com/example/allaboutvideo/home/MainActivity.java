@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
             "opengl小栗子",
             "简单利用opengl渲染播放",
             "重编码",
+            "整点花活",
     };
 
     @Override
@@ -77,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
                         case 2: {
                             Intent intent = new Intent(MainActivity.this, VideoChooseActivity.class);
                             intent.putExtra(VideoChooseActivity.JUMP_TYEP, 1);
+                            startActivity(intent);
+                            break;
+                        }
+                        case 3: {
+                            Intent intent = new Intent(MainActivity.this, VideoChooseActivity.class);
+                            intent.putExtra(VideoChooseActivity.JUMP_TYEP, 2);
                             startActivity(intent);
                             break;
                         }

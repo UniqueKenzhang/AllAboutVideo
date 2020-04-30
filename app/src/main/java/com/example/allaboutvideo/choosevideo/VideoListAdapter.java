@@ -20,6 +20,7 @@ import com.example.allaboutvideo.base.PageParam;
 import com.example.allaboutvideo.entity.VideoInfoEntity;
 import com.example.allaboutvideo.reencode.ReEncodeActivity;
 import com.example.allaboutvideo.simpleplay.SimplePlayActivity;
+import com.example.allaboutvideo.videofilter.VideoFilterActivity;
 
 import java.io.File;
 import java.util.List;
@@ -83,6 +84,10 @@ public class VideoListAdapter extends RecyclerView.Adapter<VideoListAdapter.View
                         }
                         case 1: {
                             intent = new Intent(view.getContext(), ReEncodeActivity.class);
+                            break;
+                        }
+                        case 2: {
+                            intent = new Intent(view.getContext(), VideoFilterActivity.class);
                             break;
                         }
 

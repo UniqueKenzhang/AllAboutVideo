@@ -29,7 +29,12 @@
         <activity
             android:name=".gl.GLDiceActivity"
             android:launchMode="singleTop" />
-        <activity android:name=".reencode.ReEncodeActivity" />
+        <activity
+            android:name=".reencode.ReEncodeActivity"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".videofilter.VideoFilterActivity"
+            android:launchMode="singleTop" />
     </application>
 
 </manifest>

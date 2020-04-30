@@ -2,6 +2,7 @@ package com.example.allaboutvideo.simpleplay;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.view.Surface;
@@ -25,6 +26,9 @@ public class SimplePlayActivity extends AppCompatActivity {
     SurfaceTexture surfaceTexture;
     protected String mPath;
     protected MediaPlayer mediaPlayer;
+    private OesFilter mOesFilter;
+    private BaseFilter mBaseFilter;
+    private int[] oesTextures = new int[1];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +42,6 @@ public class SimplePlayActivity extends AppCompatActivity {
         content.setEGLContextClientVersion(2);
         content.setRenderer(new GLSurfaceView.Renderer() {
 
-
-            private OesFilter mOesFilter;
-            private BaseFilter mBaseFilter;
-            private int[] oesTextures = new int[1];
 
             @Override
             public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
@@ -71,29 +71,43 @@ public class SimplePlayActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                mBaseFilter = new BaseFilter(null, BaseFilter.BASE_VERT, ShaderHolder.fStr) {
-
-                };
-                mBaseFilter.create();
+                createFilter();
                 mOesFilter = new OesFilter();
                 mOesFilter.create();
             }
 
             @Override
             public void onSurfaceChanged(GL10 gl10, int w, int h) {
-                mBaseFilter.sizeChanged(w, h);
+                onSizeChanged(w, h);
                 mOesFilter.sizeChanged(w, h);
             }
 
             @Override
             public void onDrawFrame(GL10 gl10) {
                 surfaceTexture.updateTexImage();
+                GLES20.glViewport(0, 0, mOesFilter.mWidth, mOesFilter.mHeight);
                 int texture2d = mOesFilter.drawToTexture(oesTextures[0]);
-                mBaseFilter.draw(texture2d);
+                draw(texture2d);
             }
 
         });
+    }
+
+    public void onSizeChanged(int w, int h) {
+        mBaseFilter.sizeChanged(w, h);
+
+    }
+
+    public void createFilter() {
+        mBaseFilter = new BaseFilter(null, BaseFilter.BASE_VERT, ShaderHolder.fStr) {
+
+        };
+        mBaseFilter.create();
+
+    }
+
+    public void draw(int texture2d) {
+        mBaseFilter.draw(texture2d);
     }
 
     @Override
@@ -103,14 +117,14 @@ public class SimplePlayActivity extends AppCompatActivity {
             if (surfaceTexture != null)
                 surfaceTexture.release();
 
-            if(mediaPlayer!=null){
+            if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            if(mediaPlayer!=null){
+        } finally {
+            if (mediaPlayer != null) {
                 mediaPlayer.release();
             }
         }
