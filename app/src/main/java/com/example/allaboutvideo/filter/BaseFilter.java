@@ -6,7 +6,6 @@ import android.opengl.GLES20;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.LinkedList;
 
 /**
  * BaseFilter 滤镜的基类。对于滤镜而言，要求使用者外部调用的时候必须调用的方法为
@@ -15,9 +14,6 @@ import java.util.LinkedList;
  * 在实现Filter子类时，通常需要自行编写shader，shader中的变量应同assets下base.frag及
  * base.vert中变量一致，可以增加。增加的变量需要重写{@link #onCreate()}方法，在其中
  * 获取变量用于传参。
- *
- * @author wuwang
- * @version v1.0 2017:10:31 10:48
  */
 public abstract class BaseFilter {
 
@@ -34,6 +30,7 @@ public abstract class BaseFilter {
             "    gl_Position = uVertexMatrix*aVertexCo;\n" +
             "    vTextureCo = (uTextureMatrix*vec4(aTextureCo,0,1)).xy;\n" +
             "}";
+
     protected float[] mVertexMatrix = MatrixUtils.getOriginalMatrix();
     protected float[] mTextureMatrix = MatrixUtils.getOriginalMatrix();
 
@@ -54,12 +51,7 @@ public abstract class BaseFilter {
     protected int mGLTextureMatrix;
     protected int mGLTexture;
 
-    private int mGLWidth;
-    private int mGLHeight;
-    private boolean isUseSize = false;
-
     private FrameBuffer mFrameTemp;
-    private final LinkedList<Runnable> mTasks = new LinkedList<>();
 
     protected BaseFilter(Resources resource, String vertex, String fragment) {
         this.mRes = resource;
@@ -120,9 +112,6 @@ public abstract class BaseFilter {
         return mTextureMatrix;
     }
 
-    protected void shaderNeedTextureSize(boolean need) {
-        this.isUseSize = need;
-    }
 
     protected void onCreate() {
         if (mRes != null) {
@@ -135,11 +124,6 @@ public abstract class BaseFilter {
         mGLVertexMatrix = GLES20.glGetUniformLocation(mGLProgram, "uVertexMatrix");
         mGLTextureMatrix = GLES20.glGetUniformLocation(mGLProgram, "uTextureMatrix");
         mGLTexture = GLES20.glGetUniformLocation(mGLProgram, "uTexture");
-
-        if (isUseSize) {
-            mGLWidth = GLES20.glGetUniformLocation(mGLProgram, "uWidth");
-            mGLHeight = GLES20.glGetUniformLocation(mGLProgram, "uHeight");
-        }
     }
 
     protected void onSizeChanged(int width, int height) {
@@ -188,15 +172,9 @@ public abstract class BaseFilter {
         GLES20.glDeleteProgram(mGLProgram);
     }
 
-    protected void onTaskExec() {
-        while (!mTasks.isEmpty()) {
-            mTasks.removeFirst().run();
-        }
-    }
 
     protected void onUseProgram() {
         GLES20.glUseProgram(mGLProgram);
-        onTaskExec();
     }
 
     protected void onDraw() {
@@ -214,20 +192,12 @@ public abstract class BaseFilter {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     }
 
-    public void runOnGLThread(Runnable runnable) {
-        mTasks.addLast(runnable);
-    }
-
     /**
      * 设置其他扩展数据
      */
     protected void onSetExpandData() {
         GLES20.glUniformMatrix4fv(mGLVertexMatrix, 1, false, mVertexMatrix, 0);
         GLES20.glUniformMatrix4fv(mGLTextureMatrix, 1, false, mTextureMatrix, 0);
-        if (isUseSize) {
-            GLES20.glUniform1f(mGLWidth, mWidth);
-            GLES20.glUniform1f(mGLHeight, mHeight);
-        }
     }
 
     /**

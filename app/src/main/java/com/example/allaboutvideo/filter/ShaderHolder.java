@@ -93,15 +93,17 @@ public class ShaderHolder {
 
     public static String fStr5 =
             "    precision mediump float; " +
-                    "    varying vec2 aCoordinate;" +
-                    "    uniform sampler2D vTexture;" +
+                    "    varying vec2 vTextureCo;" +
+                    "    uniform lowp float aVideoWidth;" +
+                    "    uniform lowp float aVideoHeight;" +
+                    "    uniform sampler2D uTexture;" +
                     "    void main(){" +
                     "       vec4 c = vec4(0.0,0.0,0.0,1.0);" +
-                    "       float r = 24.0;" +
+                    "       float r =80.0;" +
                     "       float count = 0.0;" +
-                    "       for(float x = -r; x <= r; x += 2.0) { " +
-                    "            float weight = (r - abs(x));" +
-                    "            c += texture2D(vTexture, aCoordinate + vec2(x/1080.0 , 0.0)) * weight;" +
+                    "       for(float x = -r; x <= r; x += 8.0) { " +
+                    "            float weight = exp(-4.0*pow(x/aVideoWidth,2.0));" +
+                    "            c += texture2D(uTexture, vTextureCo + vec2(x/aVideoWidth , 0.0))*weight;" +
                     "            count += weight;" +
                     "       }" +
                     "       gl_FragColor =c/count;" +
@@ -110,14 +112,16 @@ public class ShaderHolder {
     public static String fStr6 =
             "    precision mediump float; " +
                     "    varying vec2 vTextureCo;" +
+                    "    uniform lowp float aVideoWidth;" +
+                    "    uniform lowp float aVideoHeight;" +
                     "    uniform sampler2D uTexture;" +
                     "    void main(){" +
                     "       vec4 c = vec4(0.0,0.0,0.0,1.0);" +
-                    "       float r = 24.0;" +
+                    "       float r = 80.0;" +
                     "       float count = 0.0;" +
-                    "       for(float y = -r; y <= r; y +=2.0){" +
-                    "            float weight = (r - abs(y));" +
-                    "            c += texture2D(uTexture, vTextureCo + vec2(0.0 , y/1080.0)) * weight;" +
+                    "       for(float y = -r; y <= r; y +=8.0){" +
+                    "            float weight = exp(-4.0*pow(y/aVideoHeight,2.0));" +
+                    "            c += texture2D(uTexture, vTextureCo + vec2(0.0 , y/aVideoHeight))*weight;" +
                     "            count += weight;" +
                     "       }" +
                     "       gl_FragColor =c/count;" +
