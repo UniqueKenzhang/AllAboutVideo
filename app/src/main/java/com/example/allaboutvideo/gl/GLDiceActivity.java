@@ -40,20 +40,21 @@ public class GLDiceActivity extends AppCompatActivity {
             -x, -y, z, // 1, Bottom Left
             x, y, z, // 2, Top Right
             x, -y, z, // 3, Bottom Right
+
             x, y, -z,//4
             x, -y, -z,//5
             -x, y, -z,//6
             -x, -y, -z,//7
-            -x, y, z, // 8, Top Left
-            -x, -y, z, // 9, Bottom Left
+            -x, y, z, // 8,
+            -x, -y, z, // 9,
 
-            -x, y, z, // 10, Top Left
-            x, y, z, // 11, Top Right
+            -x, y, z, // 10
+            x, y, z, // 11
             x, y, -z,//12
             -x, y, -z,//13
 
-            -x, -y, z, // 14, Bottom Left
-            x, -y, z, // 15, Bottom Right
+            -x, -y, z, // 14
+            x, -y, z, // 15
             x, -y, -z,//16
             -x, -y, -z,//17
     };
@@ -137,6 +138,7 @@ public class GLDiceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gl_sur);
         surface = (GLSurfaceView) findViewById(R.id.content);
+        surface.setEGLContextClientVersion(2);
         surface.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
         surface.getHolder().setFormat(PixelFormat.TRANSLUCENT);
         surface.setZOrderOnTop(true);
@@ -144,6 +146,7 @@ public class GLDiceActivity extends AppCompatActivity {
 
         mTracker = VelocityTracker.obtain();
 
+        //触摸旋转
         root.setOnTouchListener(new View.OnTouchListener() {
             private static final float PI = 3.1415926f;
             public float velocityY;
@@ -154,6 +157,7 @@ public class GLDiceActivity extends AppCompatActivity {
             private float tangleY0;
             private Handler handler = new Handler();
 
+            //简单的惯性衰弱
             Runnable scorllLastTask = new Runnable() {
 
                 @Override
@@ -212,7 +216,7 @@ public class GLDiceActivity extends AppCompatActivity {
 
         bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.dice);
 
-        surface.setEGLContextClientVersion(2);
+
         // vertices with 4.
         ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
         vbb.order(ByteOrder.nativeOrder());
@@ -234,6 +238,7 @@ public class GLDiceActivity extends AppCompatActivity {
         textureBuffer = byteBuf.asFloatBuffer();
         textureBuffer.put(textureCoordinates);
         textureBuffer.position(0);
+
 
 
         surface.setRenderer(new GLSurfaceView.Renderer() {
